@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 나만의 뮤직 플레이어</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .mood-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .mood-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .mood-btn:hover, .mood-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+            color: #5a67d8;
+            font-size: 1.4em;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #5a67d8;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #5a67d8, #667eea);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(90, 103, 216, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e53e3e, #fc8181);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #38a169, #68d391);
+        }
+
+        .playlist {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .song-item {
+            background: #f7fafc;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #5a67d8;
+            transition: all 0.3s ease;
+        }
+
+        .song-item:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+
+        .song-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .song-artist {
+            color: #718096;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .song-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .link-btn {
+            background: #4299e1;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            transition: background 0.3s ease;
+        }
+
+        .link-btn:hover {
+            background: #3182ce;
+        }
+
+        .download-btn {
+            background: #38a169;
+        }
+
+        .download-btn:hover {
+            background: #2f855a;
+        }
+
+        .delete-btn {
+            background: #e53e3e;
+        }
+
+        .delete-btn:hover {
+            background: #c53030;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            background: linear-gradient(135deg, #38a169, #68d391);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .mood-selector {
+                justify-content: center;
+            }
+            
+            .mood-btn {
+                font-size: 12px;
+                padding: 10px 15px;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #38a169;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 나만의 뮤직 플레이어</h1>
+            <p>음악으로 마음을 채워보세요 ✨</p>
+        </div>
+
+        <div class="mood-selector">
+            <button class="mood-btn active" data-mood="happy">😊 기분좋을때</button>
+            <button class="mood-btn" data-mood="sad">😢 우울할때</button>
+            <button class="mood-btn" data-mood="energetic">⚡ 신날때</button>
+            <button class="mood-btn" data-mood="chill">😌 여유로울때</button>
+            <button class="mood-btn" data-mood="romantic">💕 로맨틱할때</button>
+            <button class="mood-btn" data-mood="focus">🎯 집중할때</button>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2>🎤 음악 추가하기</h2>
+                <div class="input-group">
+                    <label for="songTitle">노래 제목</label>
+                    <input type="text" id="songTitle" placeholder="노래 제목을 입력하세요">
+                </div>
+                <div class="input-group">
+                    <label for="artistName">아티스트</label>
+                    <input type="text" id="artistName" placeholder="아티스트 이름을 입력하세요">
+                </div>
+                <div class="input-group">
+                    <label for="youtubeLink">유튜브 링크</label>
+                    <input type="url" id="youtubeLink" placeholder="https://youtube.com/watch?v=...">
+                </div>
+                <div class="input-group">
+                    <label for="mvLink">뮤직비디오 링크</label>
+                    <input type="url" id="mvLink" placeholder="뮤직비디오 링크 (선택사항)">
+                </div>
+                <div class="input-group">
+                    <label for="moodSelect">무드</label>
+                    <select id="moodSelect">
+                        <option value="happy">😊 기분좋을때</option>
+                        <option value="sad">😢 우울할때</option>
+                        <option value="energetic">⚡ 신날때</option>
+                        <option value="chill">😌 여유로울때</option>
+                        <option value="romantic">💕 로맨틱할때</option>
+                        <option value="focus">🎯 집중할때</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="addSong()">🎵 음악 추가</button>
+            </div>
+
+            <div class="panel">
+                <h2 id="playlistTitle">😊 기분좋을때 플레이리스트</h2>
+                <div id="playlist" class="playlist">
+                    <!-- 플레이리스트 항목들이 여기 표시됩니다 -->
+                </div>
+                <div class="controls">
+                    <button class="btn btn-success" onclick="savePlaylist()">💾 플레이리스트 저장</button>
+                    <label for="fileInput" class="file-label">📁 플레이리스트 불러오기</label>
+                    <input type="file" id="fileInput" class="file-input" accept=".json" onchange="loadPlaylist(event)">
+                    <button class="btn btn-danger" onclick="clearPlaylist()">🗑️ 전체 삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let playlists = {
+            happy: [],
+            sad: [],
+            energetic: [],
+            chill: [],
+            romantic: [],
+            focus: []
+        };
+
+        let currentMood = 'happy';
+
+        const moodEmojis = {
+            happy: '😊',
+            sad: '😢',
+            energetic: '⚡',
+            chill: '😌',
+            romantic: '💕',
+            focus: '🎯'
+        };
+
+        const moodNames = {
+            happy: '기분좋을때',
+            sad: '우울할때',
+            energetic: '신날때',
+            chill: '여유로울때',
+            romantic: '로맨틱할때',
+            focus: '집중할때'
+        };
+
+        // 로컬 데이터 로드
+        function loadData() {
+            const saved = JSON.parse(localStorage.getItem('musicPlaylists') || '{}');
+            playlists = { ...playlists, ...saved };
+            displayPlaylist();
+        }
+
+        // 로컬 데이터 저장 (참고용 - 실제로는 메모리에만 저장됨)
+        function saveData() {
+            // localStorage를 사용할 수 없으므로 메모리에만 저장
+            console.log('플레이리스트가 메모리에 저장되었습니다.');
+        }
+
+        // 무드 선택
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMood = this.dataset.mood;
+                document.getElementById('moodSelect').value = currentMood;
+                updatePlaylistTitle();
+                displayPlaylist();
+            });
+        });
+
+        // 플레이리스트 제목 업데이트
+        function updatePlaylistTitle() {
+            document.getElementById('playlistTitle').textContent = 
+                `${moodEmojis[currentMood]} ${moodNames[currentMood]} 플레이리스트`;
+        }
+
+        // 음악 추가
+        function addSong() {
+            const title = document.getElementById('songTitle').value.trim();
+            const artist = document.getElementById('artistName').value.trim();
+            const youtube = document.getElementById('youtubeLink').value.trim();
+            const mv = document.getElementById('mvLink').value.trim();
+            const mood = document.getElementById('moodSelect').value;
+
+            if (!title || !artist || !youtube) {
+                showToast('제목, 아티스트, 유튜브 링크는 필수입니다!', 'error');
+                return;
+            }
+
+            const song = {
+                id: Date.now(),
+                title,
+                artist,
+                youtube,
+                mv: mv || null,
+                mood
+            };
+
+            playlists[mood].push(song);
+            saveData();
+
+            // 입력 필드 초기화
+            document.getElementById('songTitle').value = '';
+            document.getElementById('artistName').value = '';
+            document.getElementById('youtubeLink').value = '';
+            document.getElementById('mvLink').value = '';
+
+            if (mood === currentMood) {
+                displayPlaylist();
+            }
+
+            showToast('음악이 추가되었습니다! 🎵');
+        }
+
+        // 플레이리스트 표시
+        function displayPlaylist() {
+            const playlist = document.getElementById('playlist');
+            const songs = playlists[currentMood] || [];
+
+            if (songs.length === 0) {
+                playlist.innerHTML = '<p style="text-align: center; color: #718096; padding: 20px;">아직 추가된 음악이 없어요 🎵</p>';
+                return;
+            }
+
+            playlist.innerHTML = songs.map(song => `
+                <div class="song-item">
+                    <div class="song-title">${song.title}</div>
+                    <div class="song-artist">🎤 ${song.artist}</div>
+                    <div class="song-links">
+                        <a href="${song.youtube}" target="_blank" class="link-btn">🎬 YouTube</a>
+                        ${song.mv ? `<a href="${song.mv}" target="_blank" class="link-btn">🎥 MV</a>` : ''}
+                        <a href="${song.youtube}" download class="link-btn download-btn">⬇️ 다운로드</a>
+                        <button class="link-btn delete-btn" onclick="deleteSong(${song.id})">🗑️ 삭제</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 음악 삭제
+        function deleteSong(id) {
+            playlists[currentMood] = playlists[currentMood].filter(song => song.id !== id);
+            saveData();
+            displayPlaylist();
+            showToast('음악이 삭제되었습니다.');
+        }
+
+        // 전체 삭제
+        function clearPlaylist() {
+            if (confirm('정말로 현재 플레이리스트의 모든 음악을 삭제하시겠습니까?')) {
+                playlists[currentMood] = [];
+                saveData();
+                displayPlaylist();
+                showToast('플레이리스트가 초기화되었습니다.');
+            }
+        }
+
+        // 플레이리스트 저장 (JSON 파일)
+        function savePlaylist() {
+            const dataStr = JSON.stringify(playlists, null, 2);
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `나의_플레이리스트_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('플레이리스트가 저장되었습니다! 💾');
+        }
+
+        // 플레이리스트 불러오기
+        function loadPlaylist(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    playlists = { ...playlists, ...data };
+                    saveData();
+                    displayPlaylist();
+                    showToast('플레이리스트가 불러와졌습니다! 📁');
+                } catch (error) {
+                    showToast('파일을 읽는 중 오류가 발생했습니다.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 토스트 메시지
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
+            toast.textContent = message;
+            
+            if (type === 'error') {
+                toast.style.background = '#e53e3e';
+            }
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Enter 키 이벤트
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                addSong();
+            }
+        });
+
+        // 초기화
+        loadData();
+        updatePlaylistTitle();
+        displayPlaylist();
+    </script>
+</body>
+</html>
